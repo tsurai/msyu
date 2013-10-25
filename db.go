@@ -31,24 +31,47 @@ func DB_search_in_eng(word string) *Word {
     return nil
   }
 
-  query := fmt.Sprintf("SELECT R.value, group_concat(DISTINCT E.entity), group_concat(DISTINCT G.value), K.value " +
+  /* FIXME: fetches wrong pos infos */
+  query := fmt.Sprintf("SELECT R.value, group_concat(E.entity), group_concat(DISTINCT G.value), K.value " +
            "FROM r_ele as R, entity as E, gloss as G, pos as P, sense as S, k_ele as K " +
            "WHERE R.fk = S.fk AND S.id = P.fk AND E.id = P.entity AND S.id = G.fk AND R.fk = K.fk AND " +
            "G.value = '%s' " +
-           "ORDER BY R.id LIMIT 1", word)
+           "GROUP BY G.id ORDER BY R.fk LIMIT 10", word)
 
   var rvalue string
   var kvalue string
   var pos string
   var gloss string
+  words := make(map[int]*Word)
 
-  err := database.QueryRow(query).Scan(&rvalue, &pos, &gloss, &kvalue)
+  rows, err := database.Query(query)
   if err != nil {
-      fmt.Println("error:",err)
-      return nil
+    fmt.Fprintln(os.Stderr, "A database error has occured:", err)
+    os.Exit(1)
   }
 
-  return &Word{rvalue, kvalue, strings.Split(pos, ", "), gloss}
+  nRows := 0
+  for rows.Next() {
+    rows.Scan(&rvalue, &pos, &gloss, &kvalue)
+    words[nRows] = &Word{rvalue, kvalue, strings.Split(pos, ", "), gloss}
+    nRows = nRows + 1
+  }
+
+  if nRows > 1 {
+    fmt.Println("Select an entry:")
+    for n := 0; n < nRows; n++ {
+      fmt.Printf("%d: ", n+1)
+      words[n].Print()
+    }
+
+    entry := -1
+    fmt.Print("Entry number: ");
+    fmt.Scanf("%d", &entry)
+
+    return words[entry-1]
+  }
+
+  return words[0] 
 }
 
 func DB_search_in_jap(word string) *Word {
@@ -57,7 +80,7 @@ func DB_search_in_jap(word string) *Word {
     return nil
   }
 
-  query := fmt.Sprintf("SELECT R.value, group_concat(DISTINCT E.entity), group_concat(DISTINCT G.value), K.value " +
+  query := fmt.Sprintf("SELECT R.value, group_concat(E.entity), group_concat(DISTINCT G.value), K.value " +
            "FROM r_ele as R, entity as E, gloss as G, pos as P, sense as S, k_ele as K " +
            "WHERE R.fk = S.fk AND S.id = P.fk AND E.id = P.entity AND S.id = G.fk AND R.fk = K.fk AND " +
            "(R.value = '%s' OR K.value = '%s') " +
