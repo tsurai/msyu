@@ -5,8 +5,6 @@ import (
   "os"
   "flag"
   "strings"
-  "database/sql"
-	_ "github.com/mattn/go-sqlite3"
   "html/template"
 )
 

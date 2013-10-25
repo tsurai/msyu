@@ -172,6 +172,192 @@ func (w *Word) ToConditional(positive bool, formal bool) (string, string) {
   return kana + ending, kanji + ending
 }
 
+func (w *Word) ToProvisional(positive bool, formal bool) (string, string) {
+  var kana, kanji, ending string
+
+  if positive {
+    if formal {
+      kana, kanji = w.ToRenyoukei()
+      ending = "ますなら(ば)"
+    } else {
+      kana, kanji = w.ToIzenkei()
+      ending = "ば"
+    }
+  } else {
+    if formal {
+      kana, kanji = w.ToMizenkei()
+      ending = "ませんなら(ば)"
+    } else {
+      kana, kanji = w.ToRenyoukei()
+      ending = "なければ"
+    }
+  }
+  return kana + ending, kanji + ending
+}
+
+func (w *Word) ToPassiveAndPotentional(positive bool, formal bool) (string, string) {
+  var kana, kanji, ending string
+
+  if positive {
+    if formal {
+      kana, kanji = w.ToMizenkei()
+      ending = "れます"
+    } else {
+      kana, kanji = w.ToMizenkei()
+      ending = "れる"
+    }
+  } else {
+    if formal {
+      kana, kanji = w.ToMizenkei()
+      ending = "れません"
+    } else {
+      kana, kanji = w.ToMizenkei()
+      ending = "れない"
+    }
+  }
+  return kana + ending, kanji + ending
+}
+
+func (w *Word) ToCausative(positive bool, formal bool) (string, string) {
+  var kana, kanji, ending string
+
+  if positive {
+    if formal {
+      kana, kanji = w.ToMizenkei()
+      ending = "せます"
+    } else {
+      kana, kanji = w.ToMizenkei()
+      ending = "せる"
+    }
+  } else {
+    if formal {
+      kana, kanji = w.ToMizenkei()
+      ending = "せません"
+    } else {
+      kana, kanji = w.ToMizenkei()
+      ending = "せない"
+    }
+  }
+  return kana + ending, kanji + ending
+}
+
+func (w *Word) ToCausativePassive(positive bool, formal bool) (string, string) {
+  var kana, kanji, ending string
+
+  if positive {
+    if formal {
+      kana, kanji = w.ToMizenkei()
+      ending = "せられます"
+    } else {
+      kana, kanji = w.ToMizenkei()
+      ending = "せられる"
+    }
+  } else {
+    if formal {
+      kana, kanji = w.ToMizenkei()
+      ending = "せられません"
+    } else {
+      kana, kanji = w.ToMizenkei()
+      ending = "せられない"
+    }
+  }
+  return kana + ending, kanji + ending
+}
+
+func (w *Word) ToConjectural(positive bool, formal bool) (string, string) {
+  var kana, kanji, ending string
+
+  if positive {
+    if formal {
+      kana, kanji = w.ToRentaikei()
+      ending = "でしょう"
+    } else {
+      kana, kanji = w.ToRentaikei()
+      ending = "だろう"
+    }
+  } else {
+    if formal {
+      kana, kanji = w.ToMizenkei()
+      ending = "ないでしょう"
+    } else {
+      kana, kanji = w.ToMizenkei()
+      ending = "なかっただろう"
+    }
+  }
+  return kana + ending, kanji + ending
+}
+
+func (w *Word) ToAlternative(positive bool, formal bool) (string, string) {
+  var kana, kanji, ending string
+
+  if positive {
+    if formal {
+      kana, kanji = w.ToRenyoukei()
+      ending = "ましたり"
+    } else {
+      if w.typ[0] == "v1" {
+        kana, kanji = w.ToRenyoukei()
+        ending = "たり"
+      } else {
+        kana, kanji = w.ToStem()
+        switch(w.kana[len(kana):]) {
+          case "く":
+            ending = "いたり"
+          case "ぐ":
+            ending = "いだり"
+          case "ぬ":
+            fallthrough
+          case "ぶ":
+            fallthrough
+          case "む":
+            ending = "んだり"
+          case "う":
+            fallthrough
+          case "つ":
+            fallthrough
+          case "る":
+            ending = "ったり"
+          default:
+            kana, kanji = w.ToRenyoukei()
+            ending = "たり"
+        }
+      }
+    }
+  } else {
+    if formal {
+      kana, kanji = w.ToRenyoukei()
+      ending = "ませんでしたり"
+    } else {
+      kana, kanji = w.ToMizenkei()
+      ending = "なかったり"
+    }
+  }
+  return kana + ending, kanji + ending
+}
+
+func (w *Word) ToImperative(positive bool, formal bool) (string, string) {
+  var kana, kanji, ending string
+
+  if positive {
+    if formal {
+      kana, kanji = w.ToRenyoukei()
+      ending = "なさい"
+    } else {
+      kana, kanji = w.ToMeireikei()
+      ending = "でしょう"
+    }
+  } else {
+    if formal {
+      kana, kanji = w.ToRentaikei()
+      ending = "な"
+    } else {
+      kana, kanji = w.ToRenyoukei()
+      ending = "なさるな"
+    }
+  }
+  return kana + ending, kanji + ending
+}
+
 // Inflection bases -------------
 func (w *Word) ToStem() (string, string) {
   _, size := utf8.DecodeLastRuneInString(w.kana)
@@ -296,46 +482,31 @@ func change_vovel_sound(vovel string, sound string) string {
 
 func (w *Word) PrintConjTable() {
   var kana, kanji string
-	
+  
+  conj := make(map[string]func(bool, bool) (string, string))
+  conj["Present"] = w.ToPresent
+  conj["Past"] = w.ToPast
+  conj["-te Form"] = w.ToTeForm
+  conj["Conditional"] = w.ToConditional
+  conj["Provisional"] = w.ToProvisional
+  conj["Passive & Potentional"] = w.ToPassiveAndPotentional 
+  conj["Causative"] = w.ToCausative
+  conj["Causative Passive"] = w.ToCausativePassive
+  conj["Conjectural"] = w.ToConjectural
+  conj["Alternative"] = w.ToAlternative
+  conj["Imperative"] = w.ToImperative
+
   w.Print()
-	fmt.Printf("Present (pos)\n")
-	kana, kanji = w.ToPresent(true, false)
-  fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
-  kana, kanji = w.ToPresent(true, true)
-	fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
-	fmt.Printf("Present (neg)\n")
-  kana, kanji = w.ToPresent(false, false)
-	fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
-  kana, kanji = w.ToPresent(false, true)
-	fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
-	fmt.Printf("Past (pos)\n")
-	kana, kanji = w.ToPast(true, false)
-	fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
-	kana, kanji = w.ToPast(true, true)
-	fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
-	fmt.Printf("Past (neg)\n")
-	kana, kanji = w.ToPast(false, false)
-	fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
-	kana, kanji = w.ToPast(false, true)
-	fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
-	fmt.Printf("-te form (pos)\n")
-  kana, kanji = w.ToTeForm(true, false)
-	fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
-  kana, kanji = w.ToTeForm(true, true)
-	fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
-	fmt.Printf("-te form (neg)\n")
-  kana, kanji = w.ToTeForm(false, false)
-	fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
-  kana, kanji = w.ToTeForm(false, true)
-	fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
-	fmt.Printf("Conditional (pos)\n")
-  kana, kanji = w.ToConditional(true, false)
-	fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
-  kana, kanji = w.ToConditional(true, true)
-	fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
-	fmt.Printf("Conditional (neg)\n")
-  kana, kanji = w.ToConditional(false, false)
-	fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
-  kana, kanji = w.ToConditional(false, true)
-	fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
+  for n, f := range conj {
+	  fmt.Printf("%s (pos)\n", n)
+	  kana, kanji = f(true, false)
+    fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
+    kana, kanji = f(true, true)
+	  fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
+	  fmt.Printf("%s (neg)\n", n)
+    kana, kanji = f(false, false)
+	  fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
+    kana, kanji = f(false, true)
+	  fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
+  }
 }
