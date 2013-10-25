@@ -41,12 +41,12 @@ var commands = []command {
     Short:      "prints conjunction table",
     Long:       `Prints the conjunction table of a given word. Uses a random verb instead if no word is supplied.`,
   },
-  {
+/*  {
     Run:        test,
     UsageLine:  "test [name]",
     Short:      "starts a test",
     Long:       `Starts a new interactive test.`,
-  },
+  },*/
 }
 
 var usageTemplate = `msyu is a japanese learning tool.
@@ -138,6 +138,7 @@ func conj(cmd *command, args []string) {
   word.PrintConjTable()
 }
 
+/*
 func test(cmd *command, args []string) {
   db, err := sql.Open("sqlite3", "JMdict.db")
   if err != nil {
@@ -181,7 +182,7 @@ func test(cmd *command, args []string) {
     w.Print()
   }
 }
-
+*/
 func main() {
   flag.Parse()
   args := flag.Args()
