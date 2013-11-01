@@ -25,7 +25,12 @@ func (w *Word) ToPresent(positive bool, formal bool) (string, string) {
       ending = "ない"
     }
   }
-  return kana + ending, kanji + ending
+  
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToPast(positive bool, formal bool) (string, string) {
@@ -73,7 +78,12 @@ func (w *Word) ToPast(positive bool, formal bool) (string, string) {
       ending = "なかった" 
     }
   }
-  return kana + ending, kanji + ending
+
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToTeForm(positive bool, formal bool) (string, string) {
@@ -121,7 +131,12 @@ func (w *Word) ToTeForm(positive bool, formal bool) (string, string) {
       ending = "ないで"
     }
   }
-  return kana + ending, kanji + ending
+  
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToConditional(positive bool, formal bool) (string, string) {
@@ -169,7 +184,12 @@ func (w *Word) ToConditional(positive bool, formal bool) (string, string) {
       ending = "なかったら"
     }
   }
-  return kana + ending, kanji + ending
+
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToProvisional(positive bool, formal bool) (string, string) {
@@ -192,7 +212,12 @@ func (w *Word) ToProvisional(positive bool, formal bool) (string, string) {
       ending = "なければ"
     }
   }
-  return kana + ending, kanji + ending
+
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToPassiveAndPotentional(positive bool, formal bool) (string, string) {
@@ -215,7 +240,12 @@ func (w *Word) ToPassiveAndPotentional(positive bool, formal bool) (string, stri
       ending = "れない"
     }
   }
-  return kana + ending, kanji + ending
+
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToCausative(positive bool, formal bool) (string, string) {
@@ -238,7 +268,12 @@ func (w *Word) ToCausative(positive bool, formal bool) (string, string) {
       ending = "せない"
     }
   }
-  return kana + ending, kanji + ending
+
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToCausativePassive(positive bool, formal bool) (string, string) {
@@ -261,7 +296,12 @@ func (w *Word) ToCausativePassive(positive bool, formal bool) (string, string) {
       ending = "せられない"
     }
   }
-  return kana + ending, kanji + ending
+
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToConjectural(positive bool, formal bool) (string, string) {
@@ -284,7 +324,12 @@ func (w *Word) ToConjectural(positive bool, formal bool) (string, string) {
       ending = "なかっただろう"
     }
   }
-  return kana + ending, kanji + ending
+
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToAlternative(positive bool, formal bool) (string, string) {
@@ -332,7 +377,12 @@ func (w *Word) ToAlternative(positive bool, formal bool) (string, string) {
       ending = "なかったり"
     }
   }
-  return kana + ending, kanji + ending
+  
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 func (w *Word) ToImperative(positive bool, formal bool) (string, string) {
@@ -355,13 +405,24 @@ func (w *Word) ToImperative(positive bool, formal bool) (string, string) {
       ending = "なさるな"
     }
   }
-  return kana + ending, kanji + ending
+  
+  if(kanji != "") {
+    return kana + ending, kanji + ending
+  } else {
+    return kana + ending, kanji
+  }
 }
 
 // Inflection bases -------------
 func (w *Word) ToStem() (string, string) {
+  kanji := ""
   _, size := utf8.DecodeLastRuneInString(w.kana)
-  return w.kana[:len(w.kana)-size], w.kanji[:len(w.kanji)-size]
+  
+  if(w.kanji != "") {
+    kanji = w.kanji[:len(w.kanji)-size]
+  }
+
+  return w.kana[:len(w.kana)-size], kanji
 }
 
 func (w *Word) ToMizenkei() (string, string) {
@@ -373,7 +434,12 @@ func (w *Word) ToMizenkei() (string, string) {
     return "?", "?"
   } else {
     ending := change_vovel_sound(w.kana[len(stem):], "あ")
-    return stem + ending, kstem + ending 
+    
+    if(kstem != "") {
+      return stem + ending, kstem + ending
+    } else {
+      return stem + ending, kstem
+    }
   }
 }
 
@@ -386,7 +452,12 @@ func (w *Word) ToRenyoukei() (string, string) {
     return "?", "?"
   } else {
     ending := change_vovel_sound(w.kana[len(stem):], "い")
-    return stem + ending, kstem + ending
+    
+    if(kstem != "") {
+      return stem + ending, kstem + ending
+    } else {
+      return stem + ending, kstem
+    }
   }
 }
 
@@ -397,7 +468,12 @@ func (w *Word) ToRentaikei() (string, string) {
 func (w *Word) ToIzenkei() (string, string) {
   stem, kstem := w.ToStem()
   ending := change_vovel_sound(w.kana[len(stem):], "え")
-  return stem + ending, kstem + ending
+  
+  if(kstem != "") {
+    return stem + ending, kstem + ending
+  } else {
+    return stem + ending, kstem
+  }
 }
 
 func (w *Word) ToMeireikei() (string, string) {
@@ -483,6 +559,7 @@ func change_vovel_sound(vovel string, sound string) string {
 func (w *Word) PrintConjTable() {
   var kana, kanji string
   
+  /* make a proper class for the conjunctions with proper building rules */
   conj := make(map[string]func(bool, bool) (string, string))
   conj["Present"] = w.ToPresent
   conj["Past"] = w.ToPast
@@ -496,17 +573,19 @@ func (w *Word) PrintConjTable() {
   conj["Alternative"] = w.ToAlternative
   conj["Imperative"] = w.ToImperative
 
+  fmt.Println("")
   w.Print()
+  fmt.Println("")
   for n, f := range conj {
 	  fmt.Printf("%s (pos)\n", n)
 	  kana, kanji = f(true, false)
-    fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
+    fmt.Printf("\tinformal: \t%s  %s\n", kanji, kana)
     kana, kanji = f(true, true)
-	  fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
+	  fmt.Printf("\tformal: \t%s  %s\n", kanji, kana)
 	  fmt.Printf("%s (neg)\n", n)
     kana, kanji = f(false, false)
-	  fmt.Printf("\tinformal: \t%s  (%s)\n", kanji, kana)
+	  fmt.Printf("\tinformal: \t%s  %s\n", kanji, kana)
     kana, kanji = f(false, true)
-	  fmt.Printf("\tformal: \t%s  (%s)\n", kanji, kana)
+	  fmt.Printf("\tformal: \t%s  %s\n", kanji, kana)
   }
 }

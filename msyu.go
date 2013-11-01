@@ -115,25 +115,25 @@ func version(cmd *command, args []string) {
 
 /* TODO: list multiple results and let the user choose */
 func conj(cmd *command, args []string) {
-  var word *Word = nil
+  var word *Wordd = nil
 
-  if(len(args) < 1) {
-    word = DB_get_random_verbs(1)[0]
-  } else {
+  //if(len(args) < 1) {
+  //  word = DB_get_random_verbs(1)[0]
+  //} else {
     arg := args[0]
     
     if isJapanese(arg) {
-      word = DB_search_in_jap(arg)
+      word = DB_search_word(arg, JAP)
     } else if isLatin(arg) {
-      word = DB_search_in_eng(arg)
+      word = DB_search_word(arg, EN)
     }
-  }
+  //}
  
   if(word == nil) {
     fmt.Fprintf(os.Stderr, "Could not find word '%s'\n", args[0])
     os.Exit(2)
   }
-  word.PrintConjTable()
+  //word.PrintConjTable()
 }
 
 /*
