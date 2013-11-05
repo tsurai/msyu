@@ -26,9 +26,9 @@ func isJapanese(s string) bool {
   return true
 }
 
-func (w *Wordd) Print() {
-  if(w.kanji != "") {
-    fmt.Printf("%s (%s)\n", w.kana, w.kanji)
+func (w *Word) Print() {
+  if(w.kanji[0] != "") {
+    fmt.Printf("%s (%s)\n", w.kana, strings.Join(w.kanji, ", "))
   } else {
     fmt.Printf("%s\n", w.kana)
   }
@@ -39,13 +39,5 @@ func (w *Wordd) Print() {
       fmt.Printf("\tt: %s\n", strings.Join(g.pos, ", "))
     }
     fmt.Printf("\t  * %s \n", strings.Join(g.meaning, ", "))
-  }
-}
-
-func (w *Word) Print() {
-  if w.kanji != "" {
-    fmt.Printf("%s(%s)(%s) - %s\n", w.kanji, strings.Join(w.typ, ", "), w.kana, w.meaning)
-  } else {
-    fmt.Printf("%s(%s) - %s\n", w.kana, strings.Join(w.typ, ", "), w.meaning)
   }
 }

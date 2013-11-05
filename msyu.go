@@ -9,7 +9,7 @@ import (
 )
 
 const (
-  VERSION = "0.1.5a"
+  VERSION = "0.1.7a"
 )
 
 type command struct {
@@ -19,11 +19,15 @@ type command struct {
   Long string
 }
 
+type Gloss struct {
+  pos []string
+  meaning []string
+}
+
 type Word struct {
   kana string
-  kanji string
-  typ []string
-  meaning string
+  kanji []string
+  gloss map[int]*Gloss
 }
 
 var commands = []command {
@@ -115,25 +119,25 @@ func version(cmd *command, args []string) {
 
 /* TODO: list multiple results and let the user choose */
 func conj(cmd *command, args []string) {
-  var word *Wordd = nil
+  var word *Word = nil
 
-  //if(len(args) < 1) {
-  //  word = DB_get_random_verbs(1)[0]
-  //} else {
+  if(len(args) < 1) {
+    word = DB_get_random_verbs(1)[0]
+  } else {
     arg := args[0]
     
     if isJapanese(arg) {
-      word = DB_search_word(arg, JAP)
+      word = DB_search_word(arg, JAP, VERB)
     } else if isLatin(arg) {
-      word = DB_search_word(arg, EN)
+      word = DB_search_word(arg, EN, VERB)
     }
-  //}
+  }
  
   if(word == nil) {
     fmt.Fprintf(os.Stderr, "Could not find word '%s'\n", args[0])
     os.Exit(2)
   }
-  //word.PrintConjTable()
+  word.PrintConjTable()
 }
 
 /*

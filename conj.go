@@ -41,7 +41,7 @@ func (w *Word) ToPast(positive bool, formal bool) (string, string) {
       kana, kanji = w.ToRenyoukei()
       ending = "ました"
     } else {
-      if w.typ[0] == "v1" {
+      if w.gloss[0].pos[0] == "v1" {
         kana, kanji = w.ToRenyoukei()
         ending = "た"
       } else {
@@ -94,7 +94,7 @@ func (w *Word) ToTeForm(positive bool, formal bool) (string, string) {
       kana, kanji = w.ToRenyoukei()
       ending = "まして"
     } else {
-      if w.typ[0] == "v1" {
+      if w.gloss[0].pos[0] == "v1" {
         kana, kanji = w.ToRenyoukei()
         ending = "て"
       } else {
@@ -147,7 +147,7 @@ func (w *Word) ToConditional(positive bool, formal bool) (string, string) {
       kana, kanji = w.ToRenyoukei()
       ending = "ましたら"
     } else {
-      if w.typ[0] == "v1" {
+      if w.gloss[0].pos[0] == "v1" {
         kana, kanji = w.ToRenyoukei()
         ending = "たら"
       } else {
@@ -340,7 +340,7 @@ func (w *Word) ToAlternative(positive bool, formal bool) (string, string) {
       kana, kanji = w.ToRenyoukei()
       ending = "ましたり"
     } else {
-      if w.typ[0] == "v1" {
+      if w.gloss[0].pos[0] == "v1" {
         kana, kanji = w.ToRenyoukei()
         ending = "たり"
       } else {
@@ -417,20 +417,22 @@ func (w *Word) ToImperative(positive bool, formal bool) (string, string) {
 func (w *Word) ToStem() (string, string) {
   kanji := ""
   _, size := utf8.DecodeLastRuneInString(w.kana)
-  
-  if(w.kanji != "") {
-    kanji = w.kanji[:len(w.kanji)-size]
+
+  if(w.kanji[0] != "") {
+    kanji = w.kanji[0][:len(w.kanji[0])-size]
   }
 
   return w.kana[:len(w.kana)-size], kanji
 }
 
 func (w *Word) ToMizenkei() (string, string) {
+  pos := w.gloss[0].pos[0]
   stem, kstem := w.ToStem()
-  if w.typ[0] == "v1" {
+  
+  if w.gloss[0].pos[0] == "v1" {
     return stem, kstem
-  } else if w.typ[0] == "v5aru" || w.typ[0] == "v5k-s" || w.typ[0] == "v5r-i" ||
-       w.typ[0] == "v5u-s" || w.typ[0] == "v5uru" {
+  } else if pos == "v5aru" || pos == "v5k-s" || pos == "v5r-i" ||
+       pos == "v5u-s" || pos == "v5uru" {
     return "?", "?"
   } else {
     ending := change_vovel_sound(w.kana[len(stem):], "あ")
@@ -444,11 +446,13 @@ func (w *Word) ToMizenkei() (string, string) {
 }
 
 func (w *Word) ToRenyoukei() (string, string) {
+  pos := w.gloss[0].pos[0]
   stem, kstem := w.ToStem()
-  if w.typ[0] == "v1" {
+  
+  if w.gloss[0].pos[0] == "v1" {
     return stem, kstem
-  } else if w.typ[0] == "v5aru" || w.typ[0] == "v5k-s" || w.typ[0] == "v5r-i" ||
-       w.typ[0] == "v5u-s" || w.typ[0] == "v5uru" {
+  } else if pos == "v5aru" || pos == "v5k-s" || pos == "v5r-i" ||
+       pos == "v5u-s" || pos == "v5uru" {
     return "?", "?"
   } else {
     ending := change_vovel_sound(w.kana[len(stem):], "い")
@@ -462,7 +466,7 @@ func (w *Word) ToRenyoukei() (string, string) {
 }
 
 func (w *Word) ToRentaikei() (string, string) {
-  return w.kana, w.kanji
+  return w.kana, w.kanji[0]
 }
 
 func (w *Word) ToIzenkei() (string, string) {
@@ -477,7 +481,7 @@ func (w *Word) ToIzenkei() (string, string) {
 }
 
 func (w *Word) ToMeireikei() (string, string) {
-  if w.typ[0] == "v1" {
+  if w.gloss[0].pos[0] == "v1" {
     return w.ToStem()
   } else {
     return w.ToIzenkei()
@@ -573,7 +577,7 @@ func (w *Word) PrintConjTable() {
   conj["Alternative"] = w.ToAlternative
   conj["Imperative"] = w.ToImperative
 
-  fmt.Println("")
+  fmt.Println("--------------------")
   w.Print()
   fmt.Println("")
   for n, f := range conj {
