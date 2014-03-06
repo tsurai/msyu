@@ -4,30 +4,30 @@ import (
   "fmt"
   "os"
   "flag"
-  "strings"
   "html/template"
+  "github.com/tncardoso/gocurses"
 )
 
 const (
-  VERSION = "0.1.7a"
+  VERSION = "0.3a"
 )
 
 type command struct {
-  Run func(cmd *command, args []string)
+  Run func(*command, []string)
   UsageLine string
   Short string
   Long string
 }
 
-type Gloss struct {
+type gloss struct {
   pos []string
   meaning []string
 }
 
-type Word struct {
+type word struct {
   kana string
   kanji []string
-  gloss map[int]*Gloss
+  gloss []*gloss
 }
 
 var usageTemplate = `msyu is a japanese learning tool.
@@ -57,22 +57,6 @@ func tmpl(text string, data interface{}) {
   }
 }
 
-func (c *command) Name() string {
-  name := c.UsageLine
-  i := strings.Index(name, " ")
-
-  if i >= 0 {
-    name = name[:i]
-  }
-
-  return name
-}
-
-func (c *command) Usage() {
-  fmt.Println("usage: %s\n", c.UsageLine)
-  fmt.Println("%s", strings.TrimSpace(c.Long))
-}
-
 func help(args []string) {
   if len(args) == 0 {
     tmpl(usageTemplate, commands)
@@ -88,10 +72,15 @@ func help(args []string) {
     }
   }
 
-  fmt.Fprintf(os.Stderr, "Unknown help topic %#q.  Run 'msyu help' for a list of valid commands.\n", arg)
+  fmt.Printf("Unknown help topic %#q.  Run 'msyu help' for a list of valid commands.\n", arg)
 }
 
 func main() {
+  gocurses.Initscr()
+  defer gocurses.End()
+
+  gocurses.Cbreak()
+
   flag.Parse()
   args := flag.Args()
 

@@ -5,8 +5,72 @@ import (
 	"fmt"
 )
 
+type conjunction struct {
+  Exec func(*word, bool,bool) (string, string)
+  Name string
+  Rule string
+}
+
+var conjunctions = []conjunction {
+  {
+    Exec:       (*word).ToPresent,
+    Name:       "Present Tense",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToPast,
+    Name:       "Past Tense",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToTeForm,
+    Name:       "Te Form",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToConditional,
+    Name:       "Conditional",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToProvisional,
+    Name:       "Provisional",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToPassiveAndPotentional,
+    Name:       "Passive & Potentional",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToCausative,
+    Name:       "Causative",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToCausativePassive,
+    Name:       "Causative Passive",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToConjectural,
+    Name:       "Conjectural",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToAlternative,
+    Name:       "Alternative",
+    Rule:       ``,
+  },
+  {
+    Exec:       (*word).ToImperative,
+    Name:       "Imperative",
+    Rule:       ``,
+  },
+}
+
 // conjunction ------------
-func (w *Word) ToPresent(positive bool, formal bool) (string, string) {
+func (w *word) ToPresent(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
   
   if positive {
@@ -33,7 +97,7 @@ func (w *Word) ToPresent(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToPast(positive bool, formal bool) (string, string) {
+func (w *word) ToPast(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
@@ -86,7 +150,7 @@ func (w *Word) ToPast(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToTeForm(positive bool, formal bool) (string, string) {
+func (w *word) ToTeForm(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string  
   
   if positive {
@@ -139,7 +203,7 @@ func (w *Word) ToTeForm(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToConditional(positive bool, formal bool) (string, string) {
+func (w *word) ToConditional(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
   
   if positive {
@@ -192,7 +256,7 @@ func (w *Word) ToConditional(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToProvisional(positive bool, formal bool) (string, string) {
+func (w *word) ToProvisional(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
@@ -220,7 +284,7 @@ func (w *Word) ToProvisional(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToPassiveAndPotentional(positive bool, formal bool) (string, string) {
+func (w *word) ToPassiveAndPotentional(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
@@ -248,7 +312,7 @@ func (w *Word) ToPassiveAndPotentional(positive bool, formal bool) (string, stri
   }
 }
 
-func (w *Word) ToCausative(positive bool, formal bool) (string, string) {
+func (w *word) ToCausative(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
@@ -276,7 +340,7 @@ func (w *Word) ToCausative(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToCausativePassive(positive bool, formal bool) (string, string) {
+func (w *word) ToCausativePassive(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
@@ -304,7 +368,7 @@ func (w *Word) ToCausativePassive(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToConjectural(positive bool, formal bool) (string, string) {
+func (w *word) ToConjectural(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
@@ -332,7 +396,7 @@ func (w *Word) ToConjectural(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToAlternative(positive bool, formal bool) (string, string) {
+func (w *word) ToAlternative(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
@@ -385,7 +449,7 @@ func (w *Word) ToAlternative(positive bool, formal bool) (string, string) {
   }
 }
 
-func (w *Word) ToImperative(positive bool, formal bool) (string, string) {
+func (w *word) ToImperative(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
@@ -414,7 +478,7 @@ func (w *Word) ToImperative(positive bool, formal bool) (string, string) {
 }
 
 // Inflection bases -------------
-func (w *Word) ToStem() (string, string) {
+func (w *word) ToStem() (string, string) {
   kanji := ""
   _, size := utf8.DecodeLastRuneInString(w.kana)
 
@@ -425,7 +489,7 @@ func (w *Word) ToStem() (string, string) {
   return w.kana[:len(w.kana)-size], kanji
 }
 
-func (w *Word) ToMizenkei() (string, string) {
+func (w *word) ToMizenkei() (string, string) {
   pos := w.gloss[0].pos[0]
   stem, kstem := w.ToStem()
   
@@ -445,7 +509,7 @@ func (w *Word) ToMizenkei() (string, string) {
   }
 }
 
-func (w *Word) ToRenyoukei() (string, string) {
+func (w *word) ToRenyoukei() (string, string) {
   pos := w.gloss[0].pos[0]
   stem, kstem := w.ToStem()
   
@@ -465,11 +529,11 @@ func (w *Word) ToRenyoukei() (string, string) {
   }
 }
 
-func (w *Word) ToRentaikei() (string, string) {
+func (w *word) ToRentaikei() (string, string) {
   return w.kana, w.kanji[0]
 }
 
-func (w *Word) ToIzenkei() (string, string) {
+func (w *word) ToIzenkei() (string, string) {
   stem, kstem := w.ToStem()
   ending := change_vovel_sound(w.kana[len(stem):], "え")
   
@@ -480,7 +544,7 @@ func (w *Word) ToIzenkei() (string, string) {
   }
 }
 
-func (w *Word) ToMeireikei() (string, string) {
+func (w *word) ToMeireikei() (string, string) {
   if w.gloss[0].pos[0] == "v1" {
     return w.ToStem()
   } else {
@@ -560,7 +624,7 @@ func change_vovel_sound(vovel string, sound string) string {
   return ""
 }
 
-func (w *Word) PrintConjTable() {
+func (w *word) PrintConjTable() {
   var kana, kanji string
   
   /* make a proper class for the conjunctions with proper building rules */
