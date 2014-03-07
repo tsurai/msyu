@@ -5,7 +5,7 @@ import (
   "os"
   "flag"
   "html/template"
-  "github.com/tncardoso/gocurses"
+  "github.com/nsf/termbox-go"
 )
 
 const (
@@ -76,11 +76,6 @@ func help(args []string) {
 }
 
 func main() {
-  gocurses.Initscr()
-  defer gocurses.End()
-
-  gocurses.Cbreak()
-
   flag.Parse()
   args := flag.Args()
 
@@ -93,6 +88,14 @@ func main() {
     help(args[1:])
     os.Exit(2)
   }
+  
+  err := termbox.Init()
+  if err != nil {
+    panic(err)
+  }
+  defer termbox.Close()
+
+  // listen for resize events in go routine
 
   DB_init()
   for _, cmd := range commands {

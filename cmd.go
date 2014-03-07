@@ -4,11 +4,11 @@ import (
   "fmt"
   "os"
   "log"
-  _ "reflect"
   "math/big"
   "strings"
   "strconv"
   "crypto/rand"
+  "github.com/nsf/termbox-go"
 )
 
 var commands = []command {
@@ -65,7 +65,7 @@ func conj(cmd *command, args []string) {
   } else {
     arg := args[0]
     
-    if isJapanese(arg) {
+    if isJapaneseString(arg) {
       word = DB_search_word(arg, JAP, VERB)
     } else if isLatin(arg) {
       word = DB_search_word(arg, EN, VERB)
@@ -90,7 +90,7 @@ func test(cmd *command, args []string) {
   }
   
   if n < 0 {
-    n = 25
+    n = 5
   }
 
   switch(args[0]) {
@@ -110,34 +110,50 @@ func test_conj(n int) {
     var sPolite string
     var sPositive string
 
-    n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(conjunctions))))
+    n, _ := rand.Int(rand.Reader, big.NewInt(2/*int64(len(conjunctions))*/))
     conj := conjunctions[n.Int64()]
     polite := n.Int64() % 2 == 0
     positive := n.Int64() % 3 == 0
     
     if polite {
-      sPolite = "polite"
+      sPolite = "Polite"
     } else {
-      sPolite = "plain"
+      sPolite = "Plain"
     }
 
     if positive {
-      sPositive = "positiv"
+      sPositive = "Positiv"
     } else {
-      sPositive = "negative"
+      sPositive = "Negative"
     }
 
+    const coldef = termbox.ColorDefault
     kana, kanji := conj.Exec(word, positive, polite)
-    word.Print()
-    fmt.Printf("\n%s   %s   %s\n\n", conj.Name, sPositive, sPolite)
+    tbprint(1, 1, coldef, coldef, fmt.Sprintf("%s - %s / %s", conj.Name, sPositive, sPolite))
+    tbprint(1, 3, coldef, coldef, fmt.Sprintf("%s (%s)", word.kana, strings.Join(word.kanji, ", ")))
+    tbprint(1, 6, coldef, coldef, "Answer: ")
+    termbox.SetCursor(1+len("Answer: "), 6)
+    termbox.Flush()
 
-    entry := ""
-    fmt.Scanf("%s", &entry)
+    entry := getString(1+len("Answer: "), 6, coldef, coldef)
+
+    termbox.Flush()
+    termbox.Clear(coldef, coldef)
 
     if entry == kana || entry == kanji {
-      fmt.Println("correct!")
+      tbprint(1, 1, coldef, coldef, "Correct")
+      tbprint(1, 3, coldef, coldef, fmt.Sprintf("%s - %s / %s", conj.Name, sPositive, sPolite))
+      tbprint(1, 5, coldef, coldef, fmt.Sprintf("%s (%s)", kana, kanji))
     } else {
-      fmt.Println(kanji)
+      tbprint(1, 1, coldef, coldef, "Wrong!")
+      tbprint(1, 3, coldef, coldef, fmt.Sprintf("%s (%s)", kana, kanji))
+      tbprint(1, 5, coldef, coldef, fmt.Sprintf("%s %s %s", conj.Name, sPositive, sPolite))
     }
+
+    tbprint(1, 8, coldef, coldef, fmt.Sprint(conj.Rule))
+    termbox.Flush()
+
+    getString(-100, -100, coldef, coldef)
+    termbox.Clear(coldef, coldef)
   }
 }

@@ -15,7 +15,11 @@ var conjunctions = []conjunction {
   {
     Exec:       (*word).ToPresent,
     Name:       "Present Tense",
-    Rule:       ``,
+    Rule:       
+`* Positive Plain:  連体形 
+* Positive Polite: 連用形 + ます
+* Negative Plain:  未然形
+* Negative Polite: 連用形 + ません`,
   },
   {
     Exec:       (*word).ToPast,
@@ -627,7 +631,7 @@ func change_vovel_sound(vovel string, sound string) string {
 func (w *word) PrintConjTable() {
   var kana, kanji string
   
-  /* make a proper class for the conjunctions with proper building rules */
+  // make a proper class for the conjunctions with proper building rules 
   conj := make(map[string]func(bool, bool) (string, string))
   conj["Present"] = w.ToPresent
   conj["Past"] = w.ToPast
@@ -641,8 +645,6 @@ func (w *word) PrintConjTable() {
   conj["Alternative"] = w.ToAlternative
   conj["Imperative"] = w.ToImperative
 
-  fmt.Println("--------------------")
-  w.Print()
   fmt.Println("")
   for n, f := range conj {
 	  fmt.Printf("%s (pos)\n", n)
