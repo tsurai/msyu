@@ -5,73 +5,201 @@ import (
 	"fmt"
 )
 
-type conjunction struct {
+type conjugation struct {
   Exec func(*word, bool,bool) (string, string)
   Name string
-  Rule string
+  Rule map[string]string
 }
 
-var conjunctions = []conjunction {
+var (
+ baseRules = `  　　         一段　　　        五段
+  * 語幹:　  remove last る    remove last syllable
+  * 未然形:  語幹              replace last vowel with あ-vowel
+  * 連用形:  語幹              replace last vowel with い-vowel
+  * 連体形:  - 　              -
+  * 已然形:  語幹+る 　        replace last vowel with え-vowel
+  * 命令形:  語幹   　　       replace last vowel with え-vowel`
+)
+
+var conjugations = []conjugation {
   {
     Exec:       (*word).ToPresent,
     Name:       "Present Tense",
-    Rule:       
+    Rule:       map[string]string{
+      "v1":
 `* Positive Plain:  連体形 
 * Positive Polite: 連用形 + ます
 * Negative Plain:  未然形
 * Negative Polite: 連用形 + ません`,
+      "v5":
+`* Positive Plain:  連体形 
+* Positive Polite: 連用形 + ます
+* Negative Plain:  未然形
+* Negative Polite: 連用形 + ません`,
+    },
   },
   {
     Exec:       (*word).ToPast,
     Name:       "Past Tense",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  連用形 + た
+* Positive Polite: 連用形 + ました
+* Negative Plain:  未然形 + なかった
+* Negative Polite: 連用形 + ませんでした`,
+      "v5":
+`* Positive Plain:  連用形 + た *
+* Positive Polite: 連用形 + ました
+* Negative Plain:  未然形 + なかった
+* Negative Polite: 連用形 + ませんでした`,
+    },
   },
   {
     Exec:       (*word).ToTeForm,
     Name:       "Te Form",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  連用形 + て
+* Positive Polite: 連用形 + まして
+* Negative Plain:  未然形 + ないで
+* Negative Polite: 連用形 + ませんで`,
+      "v5":
+`* Positive Plain:  連用形 + て *
+* Positive Polite: 連用形 + まして
+* Negative Plain:  未然形 + ないで
+* Negative Polite: 連用形 + ませんで`,
+    },
   },
   {
     Exec:       (*word).ToConditional,
     Name:       "Conditional",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  連用形 + たら
+* Positive Polite: 連用形 + ましたら
+* Negative Plain:  未然形 + なかったら
+* Negative Polite: 連用形 + ませんでしたら`,
+      "v5":
+`* Positive Plain:  連用形 + たら *
+* Positive Polite: 連用形 + ましたら
+* Negative Plain:  未然形 + なかったら
+* Negative Polite: 連用形 + ませんでしたら`,
+    },
   },
   {
     Exec:       (*word).ToProvisional,
     Name:       "Provisional",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  已然形 + ば
+* Positive Polite: 連体形 + なら
+* Negative Plain:  未然形 + なければ 
+* Negative Polite: 連用形 + ませんなら`,
+      "v5":
+`* Positive Plain:  已然形 + ば
+* Positive Polite: 連体形 + なら
+* Negative Plain:  未然形 + なければ 
+* Negative Polite: 連用形 + ませんなら`,
+    },
   },
   {
     Exec:       (*word).ToPassiveAndPotentional,
     Name:       "Passive & Potentional",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  未然形 + れる
+* Positive Polite: 未然形 + れます
+* Negative Plain:  未然形 + れない
+* Negative Polite: 未然形 + れません`,
+      "v5":
+`* Positive Plain:  未然形 + れる
+* Positive Polite: 未然形 + れます
+* Negative Plain:  未然形 + れない
+* Negative Polite: 未然形 + れません`,
+    },
   },
   {
     Exec:       (*word).ToCausative,
     Name:       "Causative",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  未然形 + せる
+* Positive Polite: 未然形 + させます
+* Negative Plain:  未然形 + させない
+* Negative Polite: 未然形 + させません`,
+      "v5":
+`* Positive Plain:  未然形 + させる
+* Positive Polite: 未然形 + せます
+* Negative Plain:  未然形 + せない
+* Negative Polite: 未然形 + せません`,
+    },
   },
   {
     Exec:       (*word).ToCausativePassive,
     Name:       "Causative Passive",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  未然形 + させられる
+* Positive Polite: 未然形 + させられます
+* Negative Plain:  未然形 + させられない 
+* Negative Polite: 未然形 + させられません`,
+      "v5":
+`* Positive Plain:  未然形 + せられる
+* Positive Polite: 未然形 + せられます
+* Negative Plain:  未然形 + せられない
+* Negative Polite: 未然形 + せられません`,
+    },
   },
   {
     Exec:       (*word).ToConjectural,
     Name:       "Conjectural",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  連体形 + だろう
+* Positive Polite: 連体形 + でしょう
+* Negative Plain:  未然形 + ないだろう
+* Negative Polite: 未然形 + ないでしょう`,
+      "v5":
+`* Positive Plain:  連体形 + だろう
+* Positive Polite: 連体形 + でしょう
+* Negative Plain:  未然形 + ないだろう
+* Negative Polite: 未然形 + ないでしょう`,
+    },
   },
   {
     Exec:       (*word).ToAlternative,
     Name:       "Alternative",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  連用形 + たり
+* Positive Polite: 連用形 + ましたり
+* Negative Plain:  未然形 + なかったり
+* Negative Polite: 連用形 + ませんでしたり`,
+      "v5":
+`* Positive Plain:  連用形 + たり *
+* Positive Polite: 連用形 + ましたり
+* Negative Plain:  未然形 + なかったり
+* Negative Polite: 連用形 + ませんでしたり`,    
+    },
   },
   {
     Exec:       (*word).ToImperative,
     Name:       "Imperative",
-    Rule:       ``,
+    Rule:       map[string]string{
+      "v1":
+`* Positive Plain:  命令形 + ろ
+* Positive Polite: 連用形 + なさい
+* Negative Plain:  連体形 + な
+* Negative Polite: 連用形 + なさるな`,
+      "v5":
+`* Positive Plain:  命令形
+* Positive Polite: 連用形 + なさい
+* Negative Plain:  連体形 + な
+* Negative Polite: 連用形 + なさるな`,
+    },
   },
 }
+
 
 // conjunction ------------
 func (w *word) ToPresent(positive bool, formal bool) (string, string) {
@@ -266,7 +394,7 @@ func (w *word) ToProvisional(positive bool, formal bool) (string, string) {
   if positive {
     if formal {
       kana, kanji = w.ToRenyoukei()
-      ending = "ますなら(ば)"
+      ending = "ますなら"
     } else {
       kana, kanji = w.ToIzenkei()
       ending = "ば"
@@ -274,7 +402,7 @@ func (w *word) ToProvisional(positive bool, formal bool) (string, string) {
   } else {
     if formal {
       kana, kanji = w.ToMizenkei()
-      ending = "ませんなら(ば)"
+      ending = "ませんなら"
     } else {
       kana, kanji = w.ToRenyoukei()
       ending = "なければ"
@@ -289,22 +417,19 @@ func (w *word) ToProvisional(positive bool, formal bool) (string, string) {
 }
 
 func (w *word) ToPassiveAndPotentional(positive bool, formal bool) (string, string) {
-  var kana, kanji, ending string
+  var ending string
+  kana, kanji := w.ToMizenkei()
 
   if positive {
     if formal {
-      kana, kanji = w.ToMizenkei()
       ending = "れます"
     } else {
-      kana, kanji = w.ToMizenkei()
       ending = "れる"
     }
   } else {
     if formal {
-      kana, kanji = w.ToMizenkei()
       ending = "れません"
     } else {
-      kana, kanji = w.ToMizenkei()
       ending = "れない"
     }
   }
@@ -317,22 +442,19 @@ func (w *word) ToPassiveAndPotentional(positive bool, formal bool) (string, stri
 }
 
 func (w *word) ToCausative(positive bool, formal bool) (string, string) {
-  var kana, kanji, ending string
+  var ending string
+  kana, kanji := w.ToMizenkei()
 
   if positive {
     if formal {
-      kana, kanji = w.ToMizenkei()
       ending = "せます"
     } else {
-      kana, kanji = w.ToMizenkei()
       ending = "せる"
     }
   } else {
     if formal {
-      kana, kanji = w.ToMizenkei()
       ending = "せません"
     } else {
-      kana, kanji = w.ToMizenkei()
       ending = "せない"
     }
   }
@@ -345,22 +467,19 @@ func (w *word) ToCausative(positive bool, formal bool) (string, string) {
 }
 
 func (w *word) ToCausativePassive(positive bool, formal bool) (string, string) {
-  var kana, kanji, ending string
+  var ending string
+  kana, kanji := w.ToMizenkei()
 
   if positive {
     if formal {
-      kana, kanji = w.ToMizenkei()
       ending = "せられます"
     } else {
-      kana, kanji = w.ToMizenkei()
       ending = "せられる"
     }
   } else {
     if formal {
-      kana, kanji = w.ToMizenkei()
       ending = "せられません"
     } else {
-      kana, kanji = w.ToMizenkei()
       ending = "せられない"
     }
   }
@@ -376,19 +495,17 @@ func (w *word) ToConjectural(positive bool, formal bool) (string, string) {
   var kana, kanji, ending string
 
   if positive {
+    kana, kanji = w.ToRentaikei()
     if formal {
-      kana, kanji = w.ToRentaikei()
       ending = "でしょう"
     } else {
-      kana, kanji = w.ToRentaikei()
       ending = "だろう"
     }
   } else {
+    kana, kanji = w.ToMizenkei()
     if formal {
-      kana, kanji = w.ToMizenkei()
       ending = "ないでしょう"
     } else {
-      kana, kanji = w.ToMizenkei()
       ending = "なかっただろう"
     }
   }
@@ -401,15 +518,14 @@ func (w *word) ToConjectural(positive bool, formal bool) (string, string) {
 }
 
 func (w *word) ToAlternative(positive bool, formal bool) (string, string) {
-  var kana, kanji, ending string
+  var ending string
+  kana, kanji := w.ToRenyoukei()
 
   if positive {
     if formal {
-      kana, kanji = w.ToRenyoukei()
       ending = "ましたり"
     } else {
       if w.gloss[0].pos[0] == "v1" {
-        kana, kanji = w.ToRenyoukei()
         ending = "たり"
       } else {
         kana, kanji = w.ToStem()
@@ -431,14 +547,12 @@ func (w *word) ToAlternative(positive bool, formal bool) (string, string) {
           case "る":
             ending = "ったり"
           default:
-            kana, kanji = w.ToRenyoukei()
             ending = "たり"
         }
       }
     }
   } else {
     if formal {
-      kana, kanji = w.ToRenyoukei()
       ending = "ませんでしたり"
     } else {
       kana, kanji = w.ToMizenkei()
@@ -461,16 +575,19 @@ func (w *word) ToImperative(positive bool, formal bool) (string, string) {
       kana, kanji = w.ToRenyoukei()
       ending = "なさい"
     } else {
-      kana, kanji = w.ToMeireikei()
-      ending = "でしょう"
+      if w.gloss[0].pos[0] == "v1" {
+
+      } else {
+        kana, kanji = w.ToIzenkei() 
+      }
     }
   } else {
     if formal {
       kana, kanji = w.ToRentaikei()
-      ending = "な"
+      ending = "なさるな"
     } else {
       kana, kanji = w.ToRenyoukei()
-      ending = "なさるな"
+      ending = "な"
     }
   }
   
@@ -503,7 +620,7 @@ func (w *word) ToMizenkei() (string, string) {
        pos == "v5u-s" || pos == "v5uru" {
     return "?", "?"
   } else {
-    ending := change_vovel_sound(w.kana[len(stem):], "あ")
+    ending := changeVovelSound(w.kana[len(stem):], "あ")
     
     if(kstem != "") {
       return stem + ending, kstem + ending
@@ -523,7 +640,7 @@ func (w *word) ToRenyoukei() (string, string) {
        pos == "v5u-s" || pos == "v5uru" {
     return "?", "?"
   } else {
-    ending := change_vovel_sound(w.kana[len(stem):], "い")
+    ending := changeVovelSound(w.kana[len(stem):], "い")
     
     if(kstem != "") {
       return stem + ending, kstem + ending
@@ -539,7 +656,7 @@ func (w *word) ToRentaikei() (string, string) {
 
 func (w *word) ToIzenkei() (string, string) {
   stem, kstem := w.ToStem()
-  ending := change_vovel_sound(w.kana[len(stem):], "え")
+  ending := changeVovelSound(w.kana[len(stem):], "え")
   
   if(kstem != "") {
     return stem + ending, kstem + ending
@@ -557,7 +674,7 @@ func (w *word) ToMeireikei() (string, string) {
 }
 
 // helper functions
-func change_vovel_sound(vovel string, sound string) string {
+func changeVovelSound(vovel string, sound string) string {
   //lastVovel, _ := utf8.DecodeLastRuneInString(vovel)
   lastVovel := vovel
   if sound == "あ" {
@@ -631,7 +748,7 @@ func change_vovel_sound(vovel string, sound string) string {
 func (w *word) PrintConjTable() {
   var kana, kanji string
   
-  // make a proper class for the conjunctions with proper building rules 
+  // make a proper class for the conjugations with proper building rules 
   conj := make(map[string]func(bool, bool) (string, string))
   conj["Present"] = w.ToPresent
   conj["Past"] = w.ToPast
@@ -647,15 +764,15 @@ func (w *word) PrintConjTable() {
 
   fmt.Println("")
   for n, f := range conj {
-	  fmt.Printf("%s (pos)\n", n)
-	  kana, kanji = f(true, false)
+    fmt.Printf("%s (pos)\n", n)
+    kana, kanji = f(true, false)
     fmt.Printf("\tinformal: \t%s  %s\n", kanji, kana)
     kana, kanji = f(true, true)
-	  fmt.Printf("\tformal: \t%s  %s\n", kanji, kana)
-	  fmt.Printf("%s (neg)\n", n)
+    fmt.Printf("\tformal: \t%s  %s\n", kanji, kana)
+    fmt.Printf("%s (neg)\n", n)
     kana, kanji = f(false, false)
-	  fmt.Printf("\tinformal: \t%s  %s\n", kanji, kana)
+    fmt.Printf("\tinformal: \t%s  %s\n", kanji, kana)
     kana, kanji = f(false, true)
-	  fmt.Printf("\tformal: \t%s  %s\n", kanji, kana)
+    fmt.Printf("\tformal: \t%s  %s\n", kanji, kana)
   }
 }

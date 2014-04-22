@@ -5,11 +5,10 @@ import (
   "os"
   "flag"
   "html/template"
-  "github.com/nsf/termbox-go"
 )
 
 const (
-  VERSION = "0.3a"
+  VERSION = "0.5a"
 )
 
 type command struct {
@@ -81,6 +80,7 @@ func main() {
 
   if len(args) < 1 {
     tmpl(usageTemplate, commands)
+    
     os.Exit(1)
   }
 
@@ -89,14 +89,6 @@ func main() {
     os.Exit(2)
   }
   
-  err := termbox.Init()
-  if err != nil {
-    panic(err)
-  }
-  defer termbox.Close()
-
-  // listen for resize events in go routine
-
   DB_init()
   for _, cmd := range commands {
     if args[0] == cmd.Name() {
